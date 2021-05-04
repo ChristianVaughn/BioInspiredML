@@ -7,10 +7,14 @@ from functions import rastrigin
 from coolingSchedules import *
 from math import sqrt
 
+
 # for all plot points across all runs
 allXs = []
 allYs = []
 allZs = []
+
+# # holds tuples for each plot point = mean path across all runs
+# arrFinal = []
 
 # for recording times and results (used to calculate averages)
 times = []
@@ -52,11 +56,9 @@ def getNeighborhood(current, fnLower, fnUpper): # creating random neighbor = nei
 
 # Function to plot each point 
 def plotPoint(x, y, z, i, color, size, pltPts):
-    # append all points regardless of whether we plot them or not
     arrX.append(x)
     arrY.append(y)
     arrZ.append(z)
-    # determine which points to plot
     if(i == 0):
         print("============================================================================")
         print("Starting point on function: (x =", x, ", y =", y, ", z =", z, ")")
@@ -64,8 +66,8 @@ def plotPoint(x, y, z, i, color, size, pltPts):
         ax.plot(x, y, z, markerfacecolor=color, markeredgecolor=color, marker='o', markersize=size)
         pltPts += 1
     #elif((i > 0) and (i % 100000 == 1)):  # Lundy & Mees conditional
-    elif((i > 0) and (i % 100 == 1)):  # logarithmic multiplicative conditional
-    #elif((i > 0) and (i % 1000 == 1)):  # linear conditional
+    elif((i > 0) and (i % 10 == 1) and  (not ptFinal)):  # logarithmic multiplicative conditional
+    #elif((i > 0) and (i % 100 == 1)):  # linear conditional
     #elif((i > 0) and (not ptFinal)):  # exponential conditional
     #elif(i > 0):  # quadratic multiplicative conditional
     #elif((i > 0) and (i % 100 == 10^i)):  # stochastic tunneling conditional
@@ -86,8 +88,7 @@ def plotPoint(x, y, z, i, color, size, pltPts):
 # Start Grand Total timer for all trials
 gtTimeBeg = time.perf_counter()
 #################################** BEGIN TRIALS HERE **#################################
-trials = 1                                      
-#########################################################################################
+trials = 1
 for trial in range(0, trials):
     # hyper parameters and initializations
     T0 = 10000           # starting temperature: hyper-parameter (T_max)
@@ -112,8 +113,11 @@ for trial in range(0, trials):
     # Rastrigin function bounds [-5.12, 5.12]. Our point (x,y) == s0 
     x = random.uniform(-5.12, 5.12)         # start x 
     y = random.uniform(-5.12, 5.12)         # start y
-    z = rastrigin(x, y, A) # fx0 = ... best point so far for STUN cooling, z-value necessary otherwise
+    fx0 = z = rastrigin(x, y, A) # best point so far for STUN cooling, z-value necessary otherwise
 
+    # arrX.append(x)
+    # arrY.append(y)
+    # arrZ.append(z)
     plotPoint(x, y, z, i, "black", 7, pltPts) #initial plot point for current trial
     
     # Start Algorithm and individual timer
@@ -121,7 +125,7 @@ for trial in range(0, trials):
     while T > Tf:   # terminal condition is a near zero temperature
         
         # Decrement the temperature via cooling schedule
-        #T = lundyMees(T)             # Lundy & Mees (L&M) cooling schedule model
+        #T = lundyMees(T) # Lundy & Mees (L&M) cooling schedule model
         T = logarithmic_mult(T, i)
         #T = linear(T0, i)
         #T = exponential(T0, i)
@@ -141,8 +145,11 @@ for trial in range(0, trials):
                 x = neighborX
                 y = neighborY
 
-        z = rastrigin(x, y, A)  # fx = ... saved to be passed to STUN cooling method
-             
+        fx = z = rastrigin(x, y, A)  # fx saved to be passed to STUN cooling method
+        # arrX.append(x)
+        # arrY.append(y)
+        # arrZ.append(z) 
+        
         i += 1   
         plotPoint(x, y, z, i, 'blue', 4, pltPts)            
         pltPts += 1
@@ -189,9 +196,7 @@ ax.plot(0, 0, 0, markerfacecolor='r', markeredgecolor='r', marker='o', markersiz
 # titles for each plot
 # plt.title("Simulated Annealing Lundy & Mees Cooling Method", fontsize=14, pad=10.0)
 plt.title("Simulated Annealing Logarithmic Multiplicative Cooling", fontsize=14, pad=10.0)
-plt.savefig("SA_LogMult_CS_k0.01.png")
 # plt.title("Simulated Annealing Linear Cooling Schedule", fontsize=14, pad=10.0)
-# plt.savefig("SA_Linear_CS_k0.01.png")
 # plt.title("Simulated Annealing Exponential Cooling Schedule", fontsize=14, pad=10.0)
 # plt.title("Simulated Annealing Quadratic Multiplicative Cooling Schedule", fontsize=14, pad=10.0)
 # plt.title("Simulated Annealing Stochastic Tunneling Cooling Schedule", fontsize=14, pad=10.0)
